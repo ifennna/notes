@@ -6,7 +6,7 @@ import (
 	"os"
 	"github.com/uncultured/notes/models"
 	"log"
-)
+	)
 
 type Env struct{
 	db models.Datastore
@@ -14,7 +14,6 @@ type Env struct{
 
 var(
 	noteContent string
-	noteTag string
 )
 
 func printFlagOptions() {
@@ -27,9 +26,11 @@ func printFlagOptions() {
 func (env *Env) saveNote(note models.Note){
 	fmt.Printf("Your note is %s\n", note.Content)
 	//err := env.db.AddNote(note)
+	//note, err = env.db.GetNote(1)
 	//if err != nil {
 	//	log.Panic(err)
 	//}
+	//fmt.Printf("%s\n", note.Content)
 }
 
 func main() {
@@ -46,7 +47,7 @@ func main() {
 		printFlagOptions()
 	}
 
-	note := models.Note{Content: noteContent}
+	note := models.Note{Title: "Default", Content: noteContent}
 
 	env.saveNote(note)
 }
