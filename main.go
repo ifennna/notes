@@ -26,10 +26,10 @@ func printFlagOptions() {
 
 func (env *Env) saveNote(note models.Note){
 	fmt.Printf("Your note is %s\n", note.Content)
-	err := env.db.AddNote(note)
-	if err != nil {
-		log.Panic(err)
-	}
+	//err := env.db.AddNote(note)
+	//if err != nil {
+	//	log.Panic(err)
+	//}
 }
 
 func main() {

@@ -1,8 +1,8 @@
 package models
 
 type Note struct {
-	Content string
-	Title string
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
 func main() {
