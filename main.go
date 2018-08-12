@@ -13,7 +13,8 @@ type Env struct{
 }
 
 var(
-	note string
+	noteContent string
+	noteTag string
 )
 
 func printFlagOptions() {
@@ -23,14 +24,18 @@ func printFlagOptions() {
 	os.Exit(1)
 }
 
-func (env *Env) saveNote(note string){
-	fmt.Printf("Your note is %s\n", note)
+func (env *Env) saveNote(note models.Note){
+	fmt.Printf("Your note is %s\n", note.Content)
+	err := env.db.AddNote(note)
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 func main() {
 	flag.Parse()
 
-	db, err := models.NewDB("user:password@tcp(127.0.0.1:3306)/hello")
+	db, err := models.NewDB("notebooks.db")
 	if err != nil {
 		log.Panic(err)
 	}
@@ -41,10 +46,12 @@ func main() {
 		printFlagOptions()
 	}
 
+	note := models.Note{Content: noteContent}
+
 	env.saveNote(note)
 }
 
 
 func init() {
-	flag.StringVarP(&note, "jot", "j", "", "WriteNoteDown")
+	flag.StringVarP(&noteContent, "jot", "j", "", "Jot down a note")
 }

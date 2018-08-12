@@ -1,24 +1,20 @@
 package models
 
 import (
-	"database/sql"
-	//_ "github.com/go-sql-driver/mysql"
+	"github.com/boltdb/bolt"
 )
 
 type Datastore interface {
-
+	AddNote(note Note) (error)
 }
 
 type DB struct {
-	*sql.DB
+	*bolt.DB
 }
 
-func NewDB(dataSourceName string) (*DB, error) {
-	db, err := sql.Open("mysql" ,dataSourceName)
+func NewDB(dbFileName string) (*DB, error) {
+	db, err := bolt.Open(dbFileName, 0600, nil)
 	if err != nil {
-		return nil, err
-	}
-	if err = db.Ping(); err != nil {
 		return nil, err
 	}
 
