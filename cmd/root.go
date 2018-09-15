@@ -1,6 +1,10 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"fmt"
+	"os"
+)
 
 var root = &cobra.Command{
 	Use:           "notes",
@@ -15,6 +19,9 @@ func Register(cmd *cobra.Command) {
 }
 
 // Execute runs the main command
-func Execute() error {
-	return root.Execute()
+func Execute() {
+	if err := root.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

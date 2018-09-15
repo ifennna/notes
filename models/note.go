@@ -8,23 +8,25 @@ import (
 	)
 
 type Note struct {
-	Title   string `json:"title"`
+	//Title   string `json:"title"`
+	Id      uint64 `json:"id"`
 	Content string `json:"content"`
 }
 
-func (db *DB) AddNote(note Note) (error) {
+func (db *DB) AddNote(notebookName string, note Note) (error) {
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	notebook := tx.Bucket([]byte("Notebook"))
+	notebook, err := tx.Bucket([]byte("Notebook")).CreateBucketIfNotExists([]byte(notebookName))
 
 	noteID, err := notebook.NextSequence()
 	if err != nil {
 		return err
 	}
+	note.Id = noteID
 	if encodedNote, err := json.Marshal(note); err != nil {
 		return err
 	} else if err := notebook.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {

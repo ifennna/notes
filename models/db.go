@@ -8,8 +8,10 @@ import (
 type Datastore interface {
 	AddNotebook(notebook Notebook) (error)
 	GetNotebook(notebookTitle string) (Notebook, error)
-	AddNote(note Note) (error)
+	GetAllNotebooks() ([]Notebook, error)
+	AddNote(notebookTitle string, note Note) (error)
 	GetNote(noteIndex uint64) (Note, error)
+	Dump() ()
 }
 
 type DB struct {
@@ -22,14 +24,9 @@ func NewDB(dbFileName string) (*DB, error) {
 		return nil, err
 	}
 	err = db.Update(func(tx *bolt.Tx) error {
-		root, err := tx.CreateBucketIfNotExists([]byte("Notebook"))
+		_, err := tx.CreateBucketIfNotExists([]byte("Notebook"))
 		if err != nil {
 			return fmt.Errorf("could not create root bucket: %v", err)
-		}
-
-		_, err = root.CreateBucketIfNotExists([]byte("Note"))
-		if err != nil {
-			return fmt.Errorf("could not create note bucket: %v", err)
 		}
 		return nil
 	})
