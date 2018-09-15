@@ -32,11 +32,14 @@ func (db *DB) AddNotebook(notebook Notebook) (error) {
 func (db *DB) GetNotebook(notebookTitle string) (Notebook, error) {
 	var notebook Notebook
 	err := db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("Notebook")).Cursor()
-
+		bucket := tx.Bucket([]byte("Notebook"))
+		cursor := bucket.Cursor()
 		prefix := []byte(notebookTitle)
-		for k, v := bucket.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = bucket.Next() {
-			return json.Unmarshal(v, &notebook)
+		for key, _ := cursor.Seek(prefix); key != nil && bytes.HasPrefix(key, prefix); key, _ = cursor.Next() {
+			var notes []Note
+			notes = getNotesInNotebook(bucket, key, notes)
+			notebook.Name = string(key)
+			notebook.Notes = notes
 		}
 		return nil
 	})
