@@ -48,22 +48,32 @@ func (db *DB) GetAllNotebooks() ([]Notebook, error) {
 	err := db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("Notebook"))
 		cursor := bucket.Cursor()
-		for key, _ := cursor.First(); key != nil ; key, _ = cursor.Next() {
-			var notebook Notebook
-			var notes []Note
-			nestedBucketCursor := bucket.Bucket([]byte(key)).Cursor()
-			for key, value := nestedBucketCursor.First(); key != nil ; key, value = nestedBucketCursor.Next() {
-				var note Note
-				json.Unmarshal(value, &note)
-				notes = append(notes, note)
-			}
-			notebook.Name = string(key)
-			notebook.Notes = notes
-			notebooks = append(notebooks, notebook)
-		}
+		notebooks = getNotebooksInRootBucket(cursor, bucket, notebooks)
 		return nil
 	})
 	return notebooks, err
+}
+
+func getNotebooksInRootBucket(cursor *bolt.Cursor, bucket *bolt.Bucket, notebooks []Notebook) []Notebook {
+	for key, _ := cursor.First(); key != nil; key, _ = cursor.Next() {
+		var notebook Notebook
+		var notes []Note
+		notes = getNotesInNotebook(bucket, key, notes)
+		notebook.Name = string(key)
+		notebook.Notes = notes
+		notebooks = append(notebooks, notebook)
+	}
+	return notebooks
+}
+
+func getNotesInNotebook(bucket *bolt.Bucket, key []byte, notes []Note) []Note {
+	nestedBucketCursor := bucket.Bucket([]byte(key)).Cursor()
+	for key, value := nestedBucketCursor.First(); key != nil; key, value = nestedBucketCursor.Next() {
+		var note Note
+		json.Unmarshal(value, &note)
+		notes = append(notes, note)
+	}
+	return notes
 }
 
 func (db *DB) Dump() () {
