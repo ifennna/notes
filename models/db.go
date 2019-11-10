@@ -1,17 +1,17 @@
 package models
 
 import (
-	"github.com/boltdb/bolt"
 	"fmt"
+	"github.com/boltdb/bolt"
 )
 
 type Datastore interface {
-	AddNotebook(notebook Notebook) (error)
+	AddNotebook(notebook Notebook) error
 	GetNotebook(notebookTitle string) (Notebook, error)
 	GetAllNotebooks() ([]Notebook, error)
-	AddNote(notebookTitle string, note Note) (error)
+	AddNote(notebookTitle string, note Note) error
 	GetNote(noteIndex uint64) (Note, error)
-	Dump() ()
+	Dump()
 }
 
 type DB struct {

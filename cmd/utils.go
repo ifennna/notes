@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/uncultured/notes/models"
+	"github.com/noculture/notes/models"
 	"log"
 	"os/user"
 	"path"
@@ -13,7 +13,7 @@ func setupDatabase() models.Datastore {
 	var database models.Datastore
 	usr, err := user.Current()
 	if err != nil {
-		log.Fatal( err )
+		log.Fatal(err)
 	}
 	notebook := path.Join(usr.HomeDir, ".notebooks.db")
 

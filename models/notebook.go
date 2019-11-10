@@ -1,20 +1,20 @@
 package models
 
 import (
-	"encoding/json"
-	"github.com/boltdb/bolt"
-	"fmt"
 	"bytes"
-	"strings"
+	"encoding/json"
+	"fmt"
+	"github.com/boltdb/bolt"
 	"log"
+	"strings"
 )
 
 type Notebook struct {
-	Name  string  `json:"name"`
-	Notes []Note  `json:"notes"`
+	Name  string `json:"name"`
+	Notes []Note `json:"notes"`
 }
 
-func (db *DB) AddNotebook(notebook Notebook) (error) {
+func (db *DB) AddNotebook(notebook Notebook) error {
 	encoded, err := json.Marshal(notebook)
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func getNotesInNotebook(bucket *bolt.Bucket, key []byte, notes []Note) []Note {
 	return notes
 }
 
-func (db *DB) Dump() () {
+func (db *DB) Dump() {
 	err := db.View(func(tx *bolt.Tx) error {
 		c := tx.Cursor()
 		dumpCursor(tx, c, 0)

@@ -1,17 +1,18 @@
 package cmd
 
 import (
+	"github.com/noculture/notes/models"
 	"github.com/spf13/cobra"
-	"log"
 	"gopkg.in/kyokomi/emoji.v1"
-	"github.com/uncultured/notes/models"
+	"log"
 	"strconv"
 )
 
 var lsCommand = &cobra.Command{
-	Use: "ls <notebook>",
+	Use:   "ls <notebook>",
 	Short: "List stuff",
-	Long: "Show a list of notes or notebooks",
+	Long: "Show a list of notes or notebooks. `notes ls` will show a list of your notebooks and `notes ls NotebookName` " +
+		"will show a list of notes in the notebook you've specified",
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 
@@ -47,7 +48,6 @@ func printAllNotebooks(db models.Datastore) {
 	}
 }
 
-func init()  {
+func init() {
 	root.AddCommand(lsCommand)
 }
-

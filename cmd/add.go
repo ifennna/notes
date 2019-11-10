@@ -1,16 +1,17 @@
 package cmd
 
 import (
+	"github.com/noculture/notes/models"
 	"github.com/spf13/cobra"
-		"github.com/uncultured/notes/models"
-		"log"
-		"gopkg.in/kyokomi/emoji.v1"
+	"gopkg.in/kyokomi/emoji.v1"
+	"log"
 )
 
 var addCommand = &cobra.Command{
-	Use: "add",
+	Use:   "add",
 	Short: "Add a note",
-	Long: "Add a note to a notebook from the terminal or from an editor",
+	Long: "Add a note to a notebook from the terminal. Use `notes add \"text\"` to jot in the default notebook or" +
+		"`notes add NotebookName \"text\"` to add notes to other notebooks",
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 		var err error
@@ -19,19 +20,19 @@ var addCommand = &cobra.Command{
 		case 0:
 			emoji.Println(" :warning: You need to add some text")
 		case 1:
-			err = db.AddNote("Default", models.Note{Content:args[0]})
+			err = db.AddNote("Default", models.Note{Content: args[0]})
 			emoji.Println(" :pencil2: Note added")
 		default:
-			err = db.AddNote(args[0], models.Note{Content:args[1]})
+			err = db.AddNote(args[0], models.Note{Content: args[1]})
 			emoji.Println(" :pencil2: Note added")
 		}
-		if err != nil{
+		if err != nil {
 			log.Panic()
 		}
 
 	},
 }
 
-func init()  {
+func init() {
 	root.AddCommand(addCommand)
 }

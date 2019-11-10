@@ -1,11 +1,11 @@
 package models
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/boltdb/bolt"
-		"bytes"
 	"strconv"
-	)
+)
 
 type Note struct {
 	//Title   string `json:"title"`
@@ -13,7 +13,7 @@ type Note struct {
 	Content string `json:"content"`
 }
 
-func (db *DB) AddNote(notebookName string, note Note) (error) {
+func (db *DB) AddNote(notebookName string, note Note) error {
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
