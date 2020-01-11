@@ -39,6 +39,26 @@ func (db *DB) AddNote(notebookName string, note Note) error {
 	return err
 }
 
+func (db *DB) DeleteNote(notebookName string, noteID uint64) error {
+	tx, err := db.Begin(true)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+	err = bucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
+	if err != nil {
+		return err
+	}
+
+	// Commit the transaction.
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return err
+}
+
 func (db *DB) GetNote(noteIndex uint64) (Note, error) {
 	var note Note
 	err := db.View(func(tx *bolt.Tx) error {
