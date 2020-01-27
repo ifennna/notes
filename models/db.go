@@ -10,6 +10,7 @@ type Datastore interface {
 	GetNotebook(notebookTitle string) (Notebook, error)
 	GetAllNotebooks() ([]Notebook, error)
 	AddNote(notebookTitle string, note Note) error
+	DeleteNote(notebookName string, noteId uint64) error
 	GetNote(noteIndex uint64) (Note, error)
 	Dump()
 }
