@@ -14,10 +14,7 @@ Available Commands:
   - add: Add a note
   - help: Help about any command
   - ls: List stuff
-
+  - del: delete a note
 
 Use "notes [command] --help" for more information about a command.
 
-## TODO
-
-- Allow notes to be deleted.
