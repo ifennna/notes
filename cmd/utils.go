@@ -17,7 +17,7 @@ func setupDatabase() models.Datastore {
 	}
 	notebook := path.Join(usr.HomeDir, ".notebooks.db")
 
-	database, err = models.NewDB(notebook)
+	database, err = models.GetOrCreateDB(notebook)
 	if err != nil {
 		log.Panic(err)
 	}
