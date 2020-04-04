@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
-	"os"
-	"strconv"
 )
 
 var deleteCommand = &cobra.Command{
@@ -20,17 +21,28 @@ var deleteCommand = &cobra.Command{
 		case 0:
 			emoji.Println(" :warning: You need to specify a note to delete ")
 		case 1:
-			noteID := os.Args[2]
+			noteID := args[0]
 			noteid, err := strconv.ParseInt(noteID, 10, 64)
-			if err != nil{
+			if err != nil {
 				fmt.Println("ERROR")
 			}
 			err = db.DeleteNote("Default", uint64(noteid))
-			fmt.Println(err)
+			if err != nil {
+				log.Panic()
+			}
 			emoji.Println(" :pencil2: Note deleted from Default")
-
+		default:
+			noteID := args[1]
+			noteid, err := strconv.ParseInt(noteID, 10, 64)
+			if err != nil {
+				fmt.Println("ERROR")
+			}
+			err = db.DeleteNote(args[0], uint64(noteid))
+			if err != nil {
+				log.Panic()
+			}
+			emoji.Println(" :pencil2: Note deleted from " + args[0])
 		}
-
 
 	},
 }
