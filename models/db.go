@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+
 	"github.com/boltdb/bolt"
 )
 
@@ -9,8 +10,8 @@ type Datastore interface {
 	AddNotebook(notebook Notebook) error
 	GetNotebook(notebookTitle string) (Notebook, error)
 	GetAllNotebooks() ([]Notebook, error)
-	AddNote(notebookTitle string, note Note) error
-	DeleteNote(notebookName string, noteId uint64) error
+	AddNote(notebookTitle string, note ...Note) error
+	DeleteNote(notebookName string, noteId ...uint64) error
 	GetNote(noteIndex uint64) (Note, error)
 	Dump()
 }

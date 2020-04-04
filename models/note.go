@@ -3,8 +3,9 @@ package models
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/boltdb/bolt"
 	"strconv"
+
+	"github.com/boltdb/bolt"
 )
 
 type Note struct {
@@ -13,7 +14,7 @@ type Note struct {
 	Content string `json:"content"`
 }
 
-func (db *DB) AddNote(notebookName string, note Note) error {
+func (db *DB) AddNote(notebookName string, notes ...Note) error {
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
@@ -22,15 +23,17 @@ func (db *DB) AddNote(notebookName string, note Note) error {
 
 	notebook, err := tx.Bucket([]byte("Notebook")).CreateBucketIfNotExists([]byte(notebookName))
 
-	noteID, err := notebook.NextSequence()
-	if err != nil {
-		return err
-	}
-	note.Id = noteID
-	if encodedNote, err := json.Marshal(note); err != nil {
-		return err
-	} else if err := notebook.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
-		return err
+	for _, note := range notes {
+		noteID, err := notebook.NextSequence()
+		if err != nil {
+			return err
+		}
+		note.Id = noteID
+		if encodedNote, err := json.Marshal(note); err != nil {
+			return err
+		} else if err := notebook.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
+			return err
+		}
 	}
 	// Commit the transaction.
 	if err := tx.Commit(); err != nil {
@@ -39,7 +42,7 @@ func (db *DB) AddNote(notebookName string, note Note) error {
 	return err
 }
 
-func (db *DB) DeleteNote(notebookName string, noteID uint64) error {
+func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
@@ -47,9 +50,11 @@ func (db *DB) DeleteNote(notebookName string, noteID uint64) error {
 	defer tx.Rollback()
 
 	bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
-	err = bucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
-	if err != nil {
-		return err
+	for _, noteID := range noteIDs {
+		err = bucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
+		if err != nil {
+			return err
+		}
 	}
 
 	// Commit the transaction.
