@@ -39,7 +39,7 @@ func getSpecificNotebook(db models.Datastore, notebookTitle string) {
 }
 
 func printAllNotebooks(db models.Datastore) {
-	notebooks, err := db.GetAllNotebooks()
+	notebooks, err := db.GetAllNotebooks(true)
 	if err != nil {
 		log.Panic()
 	}

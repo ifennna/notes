@@ -64,15 +64,13 @@ func (db *DB) GetNotebook(reqName string) (Notebook, error) {
 /**
  * Retrieves all notebooks (along with their notes)
  *  - deletegates actual work to 'getNotebooksInRootBucket' function
- * two better alternatives
- *  - in current implementation GetNotebook() should use this call
- *  - (better) modify this method to 'GetAllNotebookNames'
+ * // TODO: use this method in Dump()
  */
-func (db *DB) GetAllNotebooks() ([]Notebook, error) {
+func (db *DB) GetAllNotebooks(onlyNames bool) ([]Notebook, error) {
 	var notebooks []Notebook
 	err := db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("Notebook"))
-		notebooks = getNotebooksInRootBucket(bucket.Cursor(), bucket)
+		notebooks = getNotebooksInRootBucket(bucket.Cursor(), bucket, onlyNames)
 
 		return nil
 	})
@@ -82,18 +80,20 @@ func (db *DB) GetAllNotebooks() ([]Notebook, error) {
 /**
  * Function wrapping the core logic of 'GetAllNotebooks'
  *  - iterates over notebooks in bucket
- *  - uses getNotesInNotebook() call to retrieve notes of notebooks
+ *  - optionally uses getNotesInNotebook() call to retrieve notes of notebooks
  * param: *bolt.Cursor cursor
  * param: *bolt.Bucket bucket
+ * param: bool onlyNames Whether to retrieve only name of notebooks or notes too
  * return: []Notebook
  */
-func getNotebooksInRootBucket(cursor *bolt.Cursor, bucket *bolt.Bucket) []Notebook {
+func getNotebooksInRootBucket(cursor *bolt.Cursor, bucket *bolt.Bucket, onlyNames bool) []Notebook {
 	var notebooks []Notebook
 	for notebookNameBytes, _ := cursor.First(); notebookNameBytes != nil; notebookNameBytes, _ = cursor.Next() {
 		var notebook Notebook
 		notebook.Name = string(notebookNameBytes)
-		// TODO: remove notes retrieval from here as an optimization
-		notebook.Notes = getNotesInNotebook(bucket, notebookNameBytes)
+		if !onlyNames {
+			notebook.Notes = getNotesInNotebook(bucket, notebookNameBytes)
+		}
 		notebooks = append(notebooks, notebook)
 	}
 	return notebooks
