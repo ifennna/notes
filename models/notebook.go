@@ -64,10 +64,7 @@ func (db *DB) GetNotebook(reqName string) (Notebook, error) {
 /**
  * Retrieves all notebooks (along with their notes)
  *  - deletegates actual work to 'getNotebooksInRootBucket' function
- * three better alternatives
- *  - in current implementation GetNotebook() should use this call
- *  - (better) modify this method to 'GetAllNotebookNames'
- *  - (also good) use this method in Dump, write a separate method for retrieving notebook names
+ * // TODO: use this method in Dump()
  */
 func (db *DB) GetAllNotebooks(onlyNames bool) ([]Notebook, error) {
 	var notebooks []Notebook
