@@ -9,6 +9,7 @@ import (
 )
 
 type Note struct {
+	// TODO: explore allowing 'naming' notes within a notebook
 	//Title   string `json:"title"`
 	Id      uint64 `json:"id"`
 	Content string `json:"content"`

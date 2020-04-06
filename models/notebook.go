@@ -127,10 +127,9 @@ func getNotebooksInRootBucket(cursor *bolt.Cursor, bucket *bolt.Bucket, onlyName
 func getNotesInNotebook(bucket *bolt.Bucket, notebookNameBytes []byte) []Note {
 	var notes []Note
 	nestedBucketCursor := bucket.Bucket([]byte(notebookNameBytes)).Cursor()
-	// TODO: leverage this thing and allow 'naming' notes within a notebook
-	for noteNameBytes, noteBodyBytes := nestedBucketCursor.First(); noteNameBytes != nil; noteNameBytes, noteBodyBytes = nestedBucketCursor.Next() {
+	for noteIdBytes, noteContentBytes := nestedBucketCursor.First(); noteIdBytes != nil; noteIdBytes, noteContentBytes = nestedBucketCursor.Next() {
 		var note Note
-		json.Unmarshal(noteBodyBytes, &note)
+		json.Unmarshal(noteContentBytes, &note)
 		notes = append(notes, note)
 	}
 	return notes
