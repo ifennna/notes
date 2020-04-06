@@ -66,15 +66,34 @@ func (db *DB) GetNotebook(reqName string) (Notebook, error) {
  *  - deletegates actual work to 'getNotebooksInRootBucket' function
  * // TODO: use this method in Dump()
  */
-func (db *DB) GetAllNotebooks(onlyNames bool) ([]Notebook, error) {
+func (db *DB) GetAllNotebooks() ([]Notebook, error) {
 	var notebooks []Notebook
 	err := db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("Notebook"))
-		notebooks = getNotebooksInRootBucket(bucket.Cursor(), bucket, onlyNames)
+		notebooks = getNotebooksInRootBucket(bucket.Cursor(), bucket, false)
 
 		return nil
 	})
 	return notebooks, err
+}
+
+/**
+ * Retrieves all notebook names
+ *  - delegates actual work to 'getNotebooksInRootBucket' function
+ */
+func (db *DB) GetAllNotebookNames() ([]string, error) {
+	var notebookNames []string
+	err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("Notebook"))
+		notebooks := getNotebooksInRootBucket(bucket.Cursor(), bucket, true)
+		// retrive names from notebook objects
+		for _, notebook := range notebooks {
+			notebookNames = append(notebookNames, notebook.Name)
+		}
+
+		return nil
+	})
+	return notebookNames, err
 }
 
 /**
