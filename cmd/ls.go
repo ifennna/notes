@@ -39,12 +39,12 @@ func getSpecificNotebook(db models.Datastore, notebookTitle string) {
 }
 
 func printAllNotebooks(db models.Datastore) {
-	notebooks, err := db.GetAllNotebooks()
+	notebookNames, err := db.GetAllNotebookNames()
 	if err != nil {
 		log.Panic()
 	}
-	for _, n := range notebooks {
-		emoji.Println(" :notebook_with_decorative_cover: " + n.Name)
+	for _, notebookName := range notebookNames {
+		emoji.Println(" :notebook_with_decorative_cover: " + notebookName)
 	}
 }
 
