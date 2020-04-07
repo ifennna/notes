@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/noculture/notes/models"
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
-	"log"
 )
 
 var addCommand = &cobra.Command{
@@ -23,8 +24,12 @@ var addCommand = &cobra.Command{
 			err = db.AddNote("Default", models.Note{Content: args[0]})
 			emoji.Println(" :pencil2: Note added")
 		default:
-			err = db.AddNote(args[0], models.Note{Content: args[1]})
-			emoji.Println(" :pencil2: Note added")
+			var notes []models.Note
+			for _, note := range args[1:] {
+				notes = append(notes, models.Note{Content: note})
+			}
+			err = db.AddNote(args[0], notes...)
+			emoji.Println(" :pencil2: Note(s) added")
 		}
 		if err != nil {
 			log.Panic()
