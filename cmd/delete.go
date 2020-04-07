@@ -26,6 +26,7 @@ var deleteCommand = &cobra.Command{
 			if err != nil {
 				fmt.Println("ERROR")
 			}
+			// TODO: before deletion, check if note with given id exists (and update display message accordingly)
 			err = db.DeleteNote("Default", uint64(noteid))
 			if err != nil {
 				log.Panic()
