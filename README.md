@@ -12,7 +12,7 @@ create a binary or `go install` to add it to your GOPATH.
   
 Available Commands:
   - `add`: Add a note
-    - `notes add [notebook] "my note text""`
+    - `notes add [notebook] "my 1st note" "my 2nd note" ..`
     - if `notebook` name is not supplied, it is added to `Default` notebook
     - if `notebook` doesn't exist, new notebook is created
   - `help`: Help about any command
@@ -24,7 +24,7 @@ Available Commands:
       - if notebook by given name exists, all notes of that notebook are displayed along with their `note_id`s
       - if notebook by given name doesn't exist, only the entered notebook name is shown in output (needs to be improved)
   - `del`: Delete a note
-    - `notes del notebook note_id`
+    - `notes del notebook note_id_1 note_id_2 ..`
     - if notebook by given name exists
       - if note by given note_id exists, it is deleted; and note deletion message is displayed
       - if note by given note_id doesn't exist, nothing happens. Note deleteion message still appears (needs to be fixed)

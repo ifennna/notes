@@ -28,30 +28,41 @@ type Note struct {
  * return: error
  */
 func (db *DB) AddNote(notebookName string, notes ...Note) error {
+	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	notebook, err := tx.Bucket([]byte("Notebook")).CreateBucketIfNotExists([]byte(notebookName))
+	// create or retrieve (2nd order) bucket with given notebookName
+	notebookBucket, err := tx.Bucket([]byte("Notebook")).CreateBucketIfNotExists([]byte(notebookName))
+	if err != nil {
+		return err
+	}
 
+	// for each note to be added
 	for _, note := range notes {
-		noteID, err := notebook.NextSequence()
+		// gereate noteId
+		noteID, err := notebookBucket.NextSequence()
 		if err != nil {
 			return err
 		}
 		note.Id = noteID
+
+		// put JSON-marshalled note into bolt-db bucket (of given Notebook) with noteId as key
 		if encodedNote, err := json.Marshal(note); err != nil {
 			return err
-		} else if err := notebook.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
+		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
 			return err
 		}
 	}
+
 	// Commit the transaction.
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+
 	return err
 }
 
@@ -61,25 +72,32 @@ func (db *DB) AddNote(notebookName string, notes ...Note) error {
  * param: uint64 noteID
  * return: error
  */
-func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
-	// TODO: try to remove code-duplication: txn creation & notebook bucket retrieval logic can be extracted out
+func (db *DB) DeleteNote(notebookName string, noteIds ...uint64) error {
+	// TODO: try to remove code-duplication: txn creation & notebook notebookBucket retrieval logic can be extracted out
+	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
-	for _, noteID := range noteIDs {
-		err = bucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
+	// retrieve (2nd order) bucket with given notebookName
+	notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+
+	// for each noteId supplied
+	for _, noteId := range noteIds {
+		// delete the note with given noteId from notebook's bucket
+		err = notebookBucket.Delete([]byte(strconv.FormatUint(noteId, 10)))
 		if err != nil {
 			return err
 		}
 	}
+
 	// Commit the transaction.
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+
 	return err
 }
 
