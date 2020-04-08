@@ -20,14 +20,12 @@ type Note struct {
 
 /**
  * Adds notes in the given notebook
- *  - the passed notes are expected to contain only 'Content'
- *  - notes' auto-increment 'Id' are generated and stored in the db by this method itself
- * // TODO: accept only 'Content' of Note
+ * notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * param: string notebookName
  * param: ...Note notes
  * return: error
  */
-func (db *DB) AddNotes(notebookName string, notes ...Note) error {
+func (db *DB) AddNotes(notebookName string, noteContents ...string) error {
 	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
 	if err != nil {
@@ -41,8 +39,11 @@ func (db *DB) AddNotes(notebookName string, notes ...Note) error {
 		return err
 	}
 
-	// for each note to be added
-	for _, note := range notes {
+	// for each noteContent to be added
+	for _, noteContent := range noteContents {
+		// create Note object
+		var note Note = Note{Content: noteContent}
+
 		// gereate noteId
 		noteId, err := notebookBucket.NextSequence()
 		if err != nil {
@@ -50,7 +51,7 @@ func (db *DB) AddNotes(notebookName string, notes ...Note) error {
 		}
 		note.Id = noteId
 
-		// put JSON-marshalled note into bolt-db bucket (of given Notebook) with noteId as key
+		// put JSON-marshalled noteContent into bolt-db bucket (of given Notebook) with noteId as key
 		if encodedNote, err := json.Marshal(note); err != nil {
 			return err
 		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteId, 10)), encodedNote); err != nil {
