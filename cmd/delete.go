@@ -11,9 +11,9 @@ import (
 
 var deleteCommand = &cobra.Command{
 	Use:   "del",
-	Short: "Delete a note",
-	Long: "Deletes a note from the terminal. Use `notes del Note ID` to delete from the Default" +
-		"notebook or `notes del NotebookName Note ID` to delete from a specific notebook",
+	Short: "Delete notes",
+	Long: "Deletes notes from the terminal. Use `notes del noteId` to delete a note from the Default notebook" +
+		"`notes del NotebookName noteId-1 noteId-2 ..` to delete notes from a specific notebook",
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 
@@ -26,7 +26,8 @@ var deleteCommand = &cobra.Command{
 			if err != nil {
 				fmt.Println("ERROR")
 			}
-			err = db.DeleteNote("Default", uint64(noteid))
+			// TODO: before deletion, check if note with given id exists (and update display message accordingly)
+			err = db.DeleteNotes("Default", uint64(noteid))
 			if err != nil {
 				log.Panic()
 			}
@@ -41,7 +42,7 @@ var deleteCommand = &cobra.Command{
 				}
 				noteids = append(noteids, uint64(noteid))
 			}
-			err := db.DeleteNote(args[0], noteids...)
+			err := db.DeleteNotes(args[0], noteids...)
 			if err != nil {
 				log.Panic()
 			}

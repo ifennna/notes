@@ -14,13 +14,13 @@ import (
 type Datastore interface {
 	// notebook-related operations
 	AddNotebook(notebook Notebook) error
-	GetNotebook(notebookTitle string) (Notebook, error)
+	GetNotebook(notebookName string) (Notebook, error)
 	GetAllNotebooks() ([]Notebook, error)
 	GetAllNotebookNames() ([]string, error)
 	// note-related operations
-	AddNote(notebookTitle string, notes ...Note) error
-	DeleteNote(notebookName string, noteIDs ...uint64) error
-	GetNote(noteIndex uint64) (Note, error)
+	AddNotes(notebookName string, noteContents ...string) error
+	DeleteNotes(notebookName string, noteIds ...uint64) error
+	GetNote(notebookName string, noteId uint64) (Note, error)
 	// db-backup operation
 	Dump()
 }
