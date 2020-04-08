@@ -44,16 +44,16 @@ func (db *DB) AddNote(notebookName string, notes ...Note) error {
 	// for each note to be added
 	for _, note := range notes {
 		// gereate noteId
-		noteID, err := notebookBucket.NextSequence()
+		noteId, err := notebookBucket.NextSequence()
 		if err != nil {
 			return err
 		}
-		note.Id = noteID
+		note.Id = noteId
 
 		// put JSON-marshalled note into bolt-db bucket (of given Notebook) with noteId as key
 		if encodedNote, err := json.Marshal(note); err != nil {
 			return err
-		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
+		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteId, 10)), encodedNote); err != nil {
 			return err
 		}
 	}
