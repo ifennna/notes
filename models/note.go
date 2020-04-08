@@ -62,7 +62,7 @@ func (db *DB) AddNote(notebookName string, notes ...Note) error {
  * return: error
  */
 func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
-	// TODO: try remove code-duplication: txn creation & notebook bucket retrieval logic can be extracted out
+	// TODO: try to remove code-duplication: txn creation & notebook bucket retrieval logic can be extracted out
 	tx, err := db.Begin(true)
 	if err != nil {
 		return err
