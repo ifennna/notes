@@ -89,14 +89,15 @@ func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
  * param: uint64 noteId
  * return: (Note, error)
  */
-func (db *DB) GetNote(noteId uint64) (Note, error) {
+func (db *DB) GetNote(notebookName string, reqNoteId uint64) (Note, error) {
 	var note Note
 	err := db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("Notebook")).Cursor()
+		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
 
-		noteIdBytes := []byte(strconv.FormatUint(noteId, 10))
-		for key, value := bucket.Seek(noteIdBytes); key != nil && bytes.HasPrefix(key, noteIdBytes); key, value = bucket.Next() {
-			return json.Unmarshal(value, &note)
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			return json.Unmarshal(foundNoteContentBytes, &note)
 		}
 
 		return nil
