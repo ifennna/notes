@@ -31,7 +31,7 @@ Available Commands:
     - if notebook by given name doesn't exist
       - command terminates unexpectedly with stacktrace (needs to be fixed)
   - `rm`: Removes a notebook
-    - `notes rm notebook `
+    - `notes rm notebook`
     - if `notebook` doesn't exist, nothing changes
 
 Use "notes [command] --help" for more information about a command.
