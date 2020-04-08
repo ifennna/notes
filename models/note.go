@@ -103,7 +103,6 @@ func (db *DB) DeleteNote(notebookName string, noteIds ...uint64) error {
 
 /**
  * Retrives note with a given id
- * // TODO: also accept notebookName in input
  * param: uint64 noteId
  * return: (Note, error)
  */
