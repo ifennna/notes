@@ -18,8 +18,8 @@ type Datastore interface {
 	GetAllNotebooks() ([]Notebook, error)
 	GetAllNotebookNames() ([]string, error)
 	// note-related operations
-	AddNote(notebookName string, notes ...Note) error
-	DeleteNote(notebookName string, noteIds ...uint64) error
+	AddNotes(notebookName string, notes ...Note) error
+	DeleteNotes(notebookName string, noteIds ...uint64) error
 	GetNote(notebookName string, noteId uint64) (Note, error)
 	// db-backup operation
 	Dump()

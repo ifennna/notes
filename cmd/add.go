@@ -21,14 +21,14 @@ var addCommand = &cobra.Command{
 		case 0:
 			emoji.Println(" :warning: You need to add some text")
 		case 1:
-			err = db.AddNote("Default", models.Note{Content: args[0]})
+			err = db.AddNotes("Default", models.Note{Content: args[0]})
 			emoji.Println(" :pencil2: Note added")
 		default:
 			var notes []models.Note
 			for _, note := range args[1:] {
 				notes = append(notes, models.Note{Content: note})
 			}
-			err = db.AddNote(args[0], notes...)
+			err = db.AddNotes(args[0], notes...)
 			emoji.Println(" :pencil2: Note(s) added")
 		}
 		if err != nil {

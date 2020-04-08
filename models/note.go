@@ -19,15 +19,15 @@ type Note struct {
 }
 
 /**
- * Adds a note in the given notebook
- *  - the passed note is expected to contain only 'Content'
- *  - note's auto-increment 'Id' is generated and stored in the db by this method itself
+ * Adds notes in the given notebook
+ *  - the passed notes are expected to contain only 'Content'
+ *  - notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * // TODO: accept only 'Content' of Note
  * param: string notebookName
- * param: Note   note
+ * param: ...Note notes
  * return: error
  */
-func (db *DB) AddNote(notebookName string, notes ...Note) error {
+func (db *DB) AddNotes(notebookName string, notes ...Note) error {
 	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
 	if err != nil {
@@ -67,12 +67,12 @@ func (db *DB) AddNote(notebookName string, notes ...Note) error {
 }
 
 /**
- * Deletes note with given id from the given notebook
+ * Deletes notes with given ids from the given notebook
  * param: string notebookName
- * param: uint64 noteID
+ * param: ...uint64 noteIds
  * return: error
  */
-func (db *DB) DeleteNote(notebookName string, noteIds ...uint64) error {
+func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	// TODO: try to remove code-duplication: txn creation & notebook notebookBucket retrieval logic can be extracted out
 	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
