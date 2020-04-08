@@ -17,6 +17,7 @@ type Datastore interface {
 	GetNotebook(notebookTitle string) (Notebook, error)
 	GetAllNotebooks() ([]Notebook, error)
 	GetAllNotebookNames() ([]string, error)
+	RmNotebook(notebookName string) error
 	// note-related operations
 	AddNote(notebookTitle string, notes ...Note) error
 	DeleteNote(notebookName string, noteIDs ...uint64) error
