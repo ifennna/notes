@@ -47,12 +47,14 @@ func (db *DB) GetNotebook(reqName string) (Notebook, error) {
 	var notebook Notebook
 	notebook.Name = reqName
 	err := db.View(func(tx *bolt.Tx) error {
-		// TODO: play with strings instead of bytes
+		// conver notebookName to bytes
 		reqNameBytes := []byte(reqName)
-
+		// retrieve BoltDb (base) bucket object
 		bucket := tx.Bucket([]byte("Notebook"))
+		// check if notebook by given name exists
 		foundNameBytes, _ := bucket.Cursor().Seek(reqNameBytes)
 		if foundNameBytes != nil && bytes.Equal(reqNameBytes, foundNameBytes) {
+			// if it exists, retrieve it's notes
 			notebook.Notes = getNotesInNotebook(bucket, reqNameBytes)
 		}
 
