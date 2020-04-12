@@ -55,10 +55,10 @@ func deleteNotesIfExist(db models.Datastore, notebookName string, noteIds ...uin
 			if err != nil {
 				log.Panic()
 			} else {
-				emoji.Println(fmt.Sprintf(" :pencil2: Note with noteId %d deleted from notebook %s", noteId, notebookName))
+				emoji.Println(fmt.Sprintf(" :pencil2: Note with id '%d' deleted from notebook '%s'", noteId, notebookName))
 			}
 		} else {
-			emoji.Println(fmt.Sprintf(" :warning: Note with noteId %d does not exist in notebook %s", noteId, notebookName))
+			emoji.Println(fmt.Sprintf(" :warning: Note with id '%d' does not exist in notebook '%s'", noteId, notebookName))
 		}
 	}
 }
