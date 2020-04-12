@@ -13,8 +13,9 @@ import (
  */
 type Datastore interface {
 	// notebook-related operations
-	AddNotebook(notebook Notebook) error
+	NotebookExists(notebookName string) (bool, error)
 	GetNotebook(notebookName string) (Notebook, error)
+	AddNotebook(notebook Notebook) error
 	GetAllNotebooks() ([]Notebook, error)
 	GetAllNotebookNames() ([]string, error)
 	// note-related operations
