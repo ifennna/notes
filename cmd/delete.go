@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"strconv"
-
+	"github.com/noculture/notes/models"
+	"github.com/noculture/notes/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
+	"log"
 )
 
 var deleteCommand = &cobra.Command{
@@ -17,39 +17,43 @@ var deleteCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 
+		// TODO: replace length check with 1st arg type check: if 1st arg is not int, use 'Default' notebook
 		switch len(args) {
 		case 0:
 			emoji.Println(" :warning: You need to specify a note to delete ")
 		case 1:
-			noteID := args[0]
-			noteid, err := strconv.ParseInt(noteID, 10, 64)
-			if err != nil {
-				fmt.Println("ERROR")
-			}
-			// TODO: before deletion, check if note with given id exists (and update display message accordingly)
-			err = db.DeleteNotes("Default", uint64(noteid))
-			if err != nil {
-				log.Panic()
-			}
-			emoji.Println(" :pencil2: Note deleted from Default")
+			usNoteId, _ := utils.ParseUInt64(args[0])
+			deleteNotesIfExist(db, "Default", usNoteId)
 		default:
-			noteIDs := args[1:]
-			var noteids []uint64
-			for _, noteID := range noteIDs {
-				noteid, err := strconv.ParseInt(noteID, 10, 64)
-				if err != nil {
-					fmt.Println("ERROR")
-				}
-				noteids = append(noteids, uint64(noteid))
-			}
-			err := db.DeleteNotes(args[0], noteids...)
+			notebookName := args[0]
+			usNoteIds, _ := utils.ParseUInt64Slice(args[1:])
+			deleteNotesIfExist(db, notebookName, usNoteIds...)
+		}
+	},
+}
+
+/**
+ * Deletes notes with given ids from the given notebook if they exist
+ * Displays appropriate messages whether or not note exists
+ *
+ * param: models.Datastore db
+ * param: string           notebookName
+ * param: ...uint64        noteIds
+ */
+func deleteNotesIfExist(db models.Datastore, notebookName string, noteIds ...uint64) {
+	for _, noteId := range noteIds {
+		noteExists, _ := db.NoteExists(notebookName, noteId)
+		if noteExists {
+			err := db.DeleteNotes(notebookName, noteId)
 			if err != nil {
 				log.Panic()
+			} else {
+				emoji.Println(fmt.Sprintf(" :pencil2: Note with noteId %d deleted from notebook %s", noteId, notebookName))
 			}
-			emoji.Println(" :pencil2: Note(s) deleted from " + args[0])
+		} else {
+			emoji.Println(fmt.Sprintf(" :pencil2: Note with noteId %d does not exist in notebook %s", noteId, notebookName))
 		}
-
-	},
+	}
 }
 
 func init() {
