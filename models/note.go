@@ -3,9 +3,8 @@ package models
 import (
 	"bytes"
 	"encoding/json"
-	"strconv"
-
 	"github.com/boltdb/bolt"
+	"strconv"
 )
 
 /**
@@ -16,6 +15,47 @@ type Note struct {
 	//Title   string `json:"title"`
 	Id      uint64 `json:"id"`
 	Content string `json:"content"`
+}
+
+/**
+ * Returns whether or not note with a given id exists
+ * in the given notebook or not
+ */
+func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
+	noteExists := false
+	err := db.View(func(tx *bolt.Tx) error {
+		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+
+		foundNoteIdBytes, _ := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			noteExists = true
+		}
+
+		return nil
+	})
+	return noteExists, err
+}
+
+/**
+ * Retrives note with a given id
+ * param: uint64 noteId
+ * return: (Note, error)
+ */
+func (db *DB) GetNote(notebookName string, reqNoteId uint64) (Note, error) {
+	var note Note
+	err := db.View(func(tx *bolt.Tx) error {
+		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+
+		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			return json.Unmarshal(foundNoteContentBytes, &note)
+		}
+
+		return nil
+	})
+	return note, err
 }
 
 /**
@@ -100,25 +140,4 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	}
 
 	return err
-}
-
-/**
- * Retrives note with a given id
- * param: uint64 noteId
- * return: (Note, error)
- */
-func (db *DB) GetNote(notebookName string, reqNoteId uint64) (Note, error) {
-	var note Note
-	err := db.View(func(tx *bolt.Tx) error {
-		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
-
-		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
-		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
-		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
-			return json.Unmarshal(foundNoteContentBytes, &note)
-		}
-
-		return nil
-	})
-	return note, err
 }
