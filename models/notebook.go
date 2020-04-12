@@ -18,6 +18,52 @@ type Notebook struct {
 }
 
 /**
+ * Returns whether or not notebook by given name exists
+ */
+func (db *DB) NotebookExists(notebookName string) (bool, error) {
+	notebookExists := false
+	err := db.View(func(tx *bolt.Tx) error {
+		// conver notebookName to bytes
+		reqNotebookNameBytes := []byte(notebookName)
+		// retrieve BoldDb (base) bucket object
+		bucket := tx.Bucket([]byte("Notebook"))
+		// check if notebook by given name exists
+		foundNotebookNameBytes, _ := bucket.Cursor().Seek(reqNotebookNameBytes)
+		if foundNotebookNameBytes != nil && bytes.Equal(reqNotebookNameBytes, foundNotebookNameBytes) {
+			notebookExists = true
+		}
+
+		return nil
+	})
+	return notebookExists, err
+}
+
+/**
+ * Retrieves Notebook for given 'notebookTitle' name
+ *  - uses cursor.Seek(..) to seek through keys (notebook-names) and find matching key
+ *  - then uses getNotesInNotebook() call to retrieve notes of that notebook
+ */
+func (db *DB) GetNotebook(notebookName string) (Notebook, error) {
+	var notebook Notebook
+	notebook.Name = notebookName
+	err := db.View(func(tx *bolt.Tx) error {
+		// conver notebookName to bytes
+		reqNotebookNameBytes := []byte(notebookName)
+		// retrieve BoldDb (base) bucket object
+		bucket := tx.Bucket([]byte("Notebook"))
+		// check if notebook by given name exists
+		foundNotebookNameBytes, _ := bucket.Cursor().Seek(reqNotebookNameBytes)
+		if foundNotebookNameBytes != nil && bytes.Equal(reqNotebookNameBytes, foundNotebookNameBytes) {
+			// if it exists, retrieve it's notes
+			notebook.Notes = getNotesInNotebook(bucket, reqNotebookNameBytes)
+		}
+
+		return nil
+	})
+	return notebook, err
+}
+
+/**
  * Adds a notebook in db
  * - Puts key-value pair into 'Notebook' bucket of db
  *    - Key: Name of notebook
@@ -36,29 +82,6 @@ func (db *DB) AddNotebook(notebook Notebook) error {
 		return nil
 	})
 	return err
-}
-
-/**
- * Retrieves Notebook for given 'notebookTitle' name
- *  - uses cursor.Seek(..) to seek through keys (notebook-names) and find matching key
- *  - then uses getNotesInNotebook() call to retrieve notes of that notebook
- */
-func (db *DB) GetNotebook(reqName string) (Notebook, error) {
-	var notebook Notebook
-	notebook.Name = reqName
-	err := db.View(func(tx *bolt.Tx) error {
-		// TODO: play with strings instead of bytes
-		reqNameBytes := []byte(reqName)
-
-		bucket := tx.Bucket([]byte("Notebook"))
-		foundNameBytes, _ := bucket.Cursor().Seek(reqNameBytes)
-		if foundNameBytes != nil && bytes.Equal(reqNameBytes, foundNameBytes) {
-			notebook.Notes = getNotesInNotebook(bucket, reqNameBytes)
-		}
-
-		return nil
-	})
-	return notebook, err
 }
 
 /**
