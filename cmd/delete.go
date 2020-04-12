@@ -17,6 +17,7 @@ var deleteCommand = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 
+		// TODO: replace length check with 1st arg type check: if 1st arg is not int, use 'Default' notebook
 		switch len(args) {
 		case 0:
 			emoji.Println(" :warning: You need to specify a note to delete ")
