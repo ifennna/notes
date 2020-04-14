@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/noculture/notes/models"
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
@@ -27,14 +28,19 @@ var lsCommand = &cobra.Command{
 	},
 }
 
-func getSpecificNotebook(db models.Datastore, notebookTitle string) {
-	notebook, err := db.GetNotebook(notebookTitle)
-	if err != nil {
-		log.Panic()
-	}
-	emoji.Println(notebook.Name)
-	for _, note := range notebook.Notes {
-		emoji.Println(" " + strconv.FormatUint(note.Id, 10) + "	" + note.Content)
+func getSpecificNotebook(db models.Datastore, notebookName string) {
+	notebookExists, _ := db.NotebookExists(notebookName)
+	if notebookExists {
+		notebook, err := db.GetNotebook(notebookName)
+		if err != nil {
+			log.Panic()
+		}
+		emoji.Println(notebook.Name)
+		for _, note := range notebook.Notes {
+			emoji.Println(" " + strconv.FormatUint(note.Id, 10) + "	" + note.Content)
+		}
+	} else {
+		emoji.Println(fmt.Sprintf(" :warning: Noteebook '%s' doesn't exist", notebookName))
 	}
 }
 
