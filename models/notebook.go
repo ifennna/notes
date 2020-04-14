@@ -40,37 +40,16 @@ func (db *DB) NotebookExists(notebookName string) (bool, error) {
 }
 
 /**
- * Adds a notebook in db
- * - Puts key-value pair into 'Notebook' bucket of db
- *    - Key: Name of notebook
- *    - Value: marshalled JSON blob (bytes) of Notebook object
- */
-func (db *DB) AddNotebook(notebook Notebook) error {
-	encoded, err := json.Marshal(notebook)
-	if err != nil {
-		return err
-	}
-	err = db.Update(func(tx *bolt.Tx) error {
-		err = tx.Bucket([]byte("Notebook")).Put([]byte(notebook.Name), encoded)
-		if err != nil {
-			return fmt.Errorf("could not set config: %v", err)
-		}
-		return nil
-	})
-	return err
-}
-
-/**
  * Retrieves Notebook for given 'notebookTitle' name
  *  - uses cursor.Seek(..) to seek through keys (notebook-names) and find matching key
  *  - then uses getNotesInNotebook() call to retrieve notes of that notebook
  */
-func (db *DB) GetNotebook(reqName string) (Notebook, error) {
+func (db *DB) GetNotebook(notebookName string) (Notebook, error) {
 	var notebook Notebook
-	notebook.Name = reqName
+	notebook.Name = notebookName
 	err := db.View(func(tx *bolt.Tx) error {
 		// conver notebookName to bytes
-		reqNameBytes := []byte(reqName)
+		reqNameBytes := []byte(notebookName)
 		// retrieve BoltDb (base) bucket object
 		bucket := tx.Bucket([]byte("Notebook"))
 		// check if notebook by given name exists
@@ -118,6 +97,27 @@ func (db *DB) GetAllNotebookNames() ([]string, error) {
 		return nil
 	})
 	return notebookNames, err
+}
+
+/**
+ * Adds a notebook in db
+ * - Puts key-value pair into 'Notebook' bucket of db
+ *    - Key: Name of notebook
+ *    - Value: marshalled JSON blob (bytes) of Notebook object
+ */
+func (db *DB) AddNotebook(notebook Notebook) error {
+	encoded, err := json.Marshal(notebook)
+	if err != nil {
+		return err
+	}
+	err = db.Update(func(tx *bolt.Tx) error {
+		err = tx.Bucket([]byte("Notebook")).Put([]byte(notebook.Name), encoded)
+		if err != nil {
+			return fmt.Errorf("could not set config: %v", err)
+		}
+		return nil
+	})
+	return err
 }
 
 /**
@@ -171,10 +171,9 @@ func getNotebooksInRootBucket(cursor *bolt.Cursor, bucket *bolt.Bucket, onlyName
 func getNotesInNotebook(bucket *bolt.Bucket, notebookNameBytes []byte) []Note {
 	var notes []Note
 	nestedBucketCursor := bucket.Bucket([]byte(notebookNameBytes)).Cursor()
-	// TODO: leverage this thing and allow 'naming' notes within a notebook
-	for noteNameBytes, noteBodyBytes := nestedBucketCursor.First(); noteNameBytes != nil; noteNameBytes, noteBodyBytes = nestedBucketCursor.Next() {
+	for noteIdBytes, noteContentBytes := nestedBucketCursor.First(); noteIdBytes != nil; noteIdBytes, noteContentBytes = nestedBucketCursor.Next() {
 		var note Note
-		json.Unmarshal(noteBodyBytes, &note)
+		json.Unmarshal(noteContentBytes, &note)
 		notes = append(notes, note)
 	}
 	return notes
