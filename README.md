@@ -30,6 +30,9 @@ Available Commands:
       - if note by given note_id doesn't exist, nothing happens. Note deleteion message still appears (needs to be fixed)
     - if notebook by given name doesn't exist
       - command terminates unexpectedly with stacktrace (needs to be fixed)
+  - `rm`: Removes a notebook
+    - `notes rm notebook`
+    - if `notebook` doesn't exist, nothing changes
 
 Use "notes [command] --help" for more information about a command.
 
