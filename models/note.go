@@ -19,6 +19,26 @@ type Note struct {
 }
 
 /**
+ * Returns whether or not note with a given id exists
+ * in the given notebook or not
+ */
+func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
+	noteExists := false
+	err := db.View(func(tx *bolt.Tx) error {
+		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+
+		foundNoteIdBytes, _ := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			noteExists = true
+		}
+
+		return nil
+	})
+	return noteExists, err
+}
+
+/**
  * Adds notes in the given notebook
  * notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * param: string notebookName

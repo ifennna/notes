@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/noculture/notes/models"
 	"log"
 	"os/user"
 	"path"
+
+	"github.com/noculture/notes/models"
 )
 
 /**

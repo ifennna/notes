@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
 	"log"
 	"strings"
+
+	"github.com/boltdb/bolt"
 )
 
 /**
@@ -15,6 +16,27 @@ import (
 type Notebook struct {
 	Name  string `json:"name"`
 	Notes []Note `json:"notes"`
+}
+
+/**
+ * Returns whether or not notebook by given name exists
+ */
+func (db *DB) NotebookExists(notebookName string) (bool, error) {
+	notebookExists := false
+	err := db.View(func(tx *bolt.Tx) error {
+		// conver notebookName to bytes
+		reqNotebookNameBytes := []byte(notebookName)
+		// retrieve BoldDb (base) bucket object
+		bucket := tx.Bucket([]byte("Notebook"))
+		// check if notebook by given name exists
+		foundNotebookNameBytes, _ := bucket.Cursor().Seek(reqNotebookNameBytes)
+		if foundNotebookNameBytes != nil && bytes.Equal(reqNotebookNameBytes, foundNotebookNameBytes) {
+			notebookExists = true
+		}
+
+		return nil
+	})
+	return notebookExists, err
 }
 
 /**
@@ -96,6 +118,26 @@ func (db *DB) GetAllNotebookNames() ([]string, error) {
 		return nil
 	})
 	return notebookNames, err
+}
+
+/**
+ * Removes a notebook from db
+ * - Removes the 'Notebook' bucket from db
+ *    - notebookName: Name of notebook
+ */
+func (db *DB) RmNotebook(notebookName string) error {
+	err := db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+		if bucket != nil {
+			err := tx.Bucket([]byte("Notebook")).DeleteBucket([]byte(notebookName))
+			if err != nil {
+				return fmt.Errorf("could delete bucket: %v", err)
+			}
+			return nil
+		}
+		return nil
+	})
+	return err
 }
 
 /**
