@@ -18,6 +18,8 @@ type Datastore interface {
 	GetAllNotebooks() ([]Notebook, error)
 	GetAllNotebookNames() ([]string, error)
 	AddNotebook(notebook Notebook) error
+	RmNotebook(notebookName string) error
+
 	// note-related operations
 	NoteExists(notebookName string, noteId uint64) (bool, error)
 	GetNote(noteIndex uint64) (Note, error)

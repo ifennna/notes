@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/boltdb/bolt"
 	"log"
 	"strings"
+
+	"github.com/boltdb/bolt"
 )
 
 /**
@@ -115,6 +116,26 @@ func (db *DB) GetAllNotebookNames() ([]string, error) {
 		return nil
 	})
 	return notebookNames, err
+}
+
+/**
+ * Removes a notebook from db
+ * - Removes the 'Notebook' bucket from db
+ *    - notebookName: Name of notebook
+ */
+func (db *DB) RmNotebook(notebookName string) error {
+	err := db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+		if bucket != nil {
+			err := tx.Bucket([]byte("Notebook")).DeleteBucket([]byte(notebookName))
+			if err != nil {
+				return fmt.Errorf("could delete bucket: %v", err)
+			}
+			return nil
+		}
+		return nil
+	})
+	return err
 }
 
 /**
