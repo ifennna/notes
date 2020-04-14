@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/noculture/notes/models"
 	"log"
 	"strconv"
 
@@ -49,6 +50,30 @@ var deleteCommand = &cobra.Command{
 		}
 
 	},
+}
+
+/**
+ * Deletes notes with given ids from the given notebook if they exist
+ * Displays appropriate messages whether or not note exists
+ *
+ * param: models.Datastore db
+ * param: string           notebookName
+ * param: ...uint64        noteIds
+ */
+func deleteNotesIfExist(db models.Datastore, notebookName string, noteIds ...uint64) {
+	for _, noteId := range noteIds {
+		noteExists, _ := db.NoteExists(notebookName, noteId)
+		if noteExists {
+			err := db.DeleteNote(notebookName, noteId)
+			if err != nil {
+				log.Panic()
+			} else {
+				emoji.Println(fmt.Sprintf(" :pencil2: Note with id '%d' deleted from notebook '%s'", noteId, notebookName))
+			}
+		} else {
+			emoji.Println(fmt.Sprintf(" :warning: Note with id '%d' does not exist in notebook '%s'", noteId, notebookName))
+		}
+	}
 }
 
 func init() {
