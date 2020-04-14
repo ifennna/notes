@@ -14,6 +14,26 @@ type Note struct {
 	Content string `json:"content"`
 }
 
+/**
+ * Returns whether or not note with a given id exists
+ * in the given notebook or not
+ */
+func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
+	noteExists := false
+	err := db.View(func(tx *bolt.Tx) error {
+		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+
+		foundNoteIdBytes, _ := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			noteExists = true
+		}
+
+		return nil
+	})
+	return noteExists, err
+}
+
 func (db *DB) AddNote(notebookName string, notes ...Note) error {
 	tx, err := db.Begin(true)
 	if err != nil {

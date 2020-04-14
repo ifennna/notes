@@ -19,6 +19,27 @@ type Notebook struct {
 }
 
 /**
+ * Returns whether or not notebook by given name exists
+ */
+func (db *DB) NotebookExists(notebookName string) (bool, error) {
+	notebookExists := false
+	err := db.View(func(tx *bolt.Tx) error {
+		// conver notebookName to bytes
+		reqNotebookNameBytes := []byte(notebookName)
+		// retrieve BoldDb (base) bucket object
+		bucket := tx.Bucket([]byte("Notebook"))
+		// check if notebook by given name exists
+		foundNotebookNameBytes, _ := bucket.Cursor().Seek(reqNotebookNameBytes)
+		if foundNotebookNameBytes != nil && bytes.Equal(reqNotebookNameBytes, foundNotebookNameBytes) {
+			notebookExists = true
+		}
+
+		return nil
+	})
+	return notebookExists, err
+}
+
+/**
  * Adds a notebook in db
  * - Puts key-value pair into 'Notebook' bucket of db
  *    - Key: Name of notebook
