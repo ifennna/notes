@@ -23,8 +23,8 @@ type Datastore interface {
 	// note-related operations
 	NoteExists(notebookName string, noteId uint64) (bool, error)
 	GetNote(noteIndex uint64) (Note, error)
-	AddNote(notebookTitle string, notes ...Note) error
-	DeleteNote(notebookName string, noteIDs ...uint64) error
+	AddNotes(notebookTitle string, notes ...Note) error
+	DeleteNotes(notebookName string, noteIds ...uint64) error
 	// db-backup operation
 	Dump()
 }
