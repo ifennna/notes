@@ -45,7 +45,7 @@ func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
  * param: ...Note notes
  * return: error
  */
-func (db *DB) AddNote(notebookName string, notes ...Note) error {
+func (db *DB) AddNote(notebookName string, noteContents ...string) error {
 	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
 	if err != nil {
@@ -54,20 +54,27 @@ func (db *DB) AddNote(notebookName string, notes ...Note) error {
 	defer tx.Rollback()
 
 	// create or retrieve (2nd order) bucket with given notebookName
-	notebook, err := tx.Bucket([]byte("Notebook")).CreateBucketIfNotExists([]byte(notebookName))
+	notebookBucket, err := tx.Bucket([]byte("Notebook")).CreateBucketIfNotExists([]byte(notebookName))
+	if err != nil {
+		return err
+	}
 
 	// for each noteContent to be added
-	for _, note := range notes {
+	for _, noteContent := range noteContents {
+		// create Note object
+		var note Note = Note{Content: noteContent}
+
 		// gereate noteId
-		noteID, err := notebook.NextSequence()
+		noteId, err := notebookBucket.NextSequence()
 		if err != nil {
 			return err
 		}
-		note.Id = noteID
+		note.Id = noteId
+
 		// put JSON-marshalled noteContent into bolt-db bucket (of given Notebook) with noteId as key
 		if encodedNote, err := json.Marshal(note); err != nil {
 			return err
-		} else if err := notebook.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
+		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteId, 10)), encodedNote); err != nil {
 			return err
 		}
 	}
@@ -76,6 +83,7 @@ func (db *DB) AddNote(notebookName string, notes ...Note) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+
 	return err
 }
 
