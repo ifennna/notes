@@ -137,10 +137,9 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-  
-  return err
-}
 
+	return err
+}
 
 /**
  * Retreives note with a given id
