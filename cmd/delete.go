@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/noculture/notes/models"
+	"github.com/noculture/notes/utils"
 	"log"
 	"strconv"
 
@@ -16,39 +17,30 @@ var deleteCommand = &cobra.Command{
 	Long: "Deletes notes from the terminal. Use `notes del noteId` to delete a note from the Default notebook" +
 		"`notes del NotebookName noteId-1 noteId-2 ..` to delete notes from a specific notebook",
 	Run: func(cmd *cobra.Command, args []string) {
-		db := setupDatabase()
-
-		switch len(args) {
-		case 0:
+		if len(args) == 0 {
 			emoji.Println(" :warning: You need to specify a note to delete ")
-		case 1:
-			noteID := args[0]
-			noteid, err := strconv.ParseInt(noteID, 10, 64)
-			if err != nil {
-				fmt.Println("ERROR")
+		} else {
+			// set db
+			db := setupDatabase()
+			// declare variables to hold parsed args
+			var notebookName string
+			var usNoteIds []uint64
+			// determine notebook to delete the notes from
+			switch _, err := strconv.Atoi(args[0]); err {
+			case nil:
+				// if notebook name isn't passed as 1st arg, treat all arguments as noteIds
+				// to be deleted from 'Default' notebook
+				notebookName = "Default"
+				usNoteIds, _ = utils.ParseUInt64Slice(args[0:])
+			default:
+				// if notebook name is passed as 1st arg, treat remaining args as noteIds
+				// to be deleted from the name of notebook passed in 1st arg
+				notebookName = args[0]
+				usNoteIds, _ = utils.ParseUInt64Slice(args[1:])
 			}
-			err = db.DeleteNotes("Default", uint64(noteid))
-			if err != nil {
-				log.Panic()
-			}
-			emoji.Println(" :pencil2: Note deleted from Default")
-		default:
-			noteIDs := args[1:]
-			var noteids []uint64
-			for _, noteID := range noteIDs {
-				noteid, err := strconv.ParseInt(noteID, 10, 64)
-				if err != nil {
-					fmt.Println("ERROR")
-				}
-				noteids = append(noteids, uint64(noteid))
-			}
-			err := db.DeleteNotes(args[0], noteids...)
-			if err != nil {
-				log.Panic()
-			}
-			emoji.Println(" :pencil2: Note(s) deleted from " + args[0])
+			// delete notes with given noteIds if they exist in the notebook
+			deleteNotesIfExist(db, notebookName, usNoteIds...)
 		}
-
 	},
 }
 
