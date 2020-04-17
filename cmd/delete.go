@@ -26,7 +26,7 @@ var deleteCommand = &cobra.Command{
 			if err != nil {
 				fmt.Println("ERROR")
 			}
-			err = db.DeleteNote("Default", uint64(noteid))
+			err = db.DeleteNotes("Default", uint64(noteid))
 			if err != nil {
 				log.Panic()
 			}
@@ -41,7 +41,7 @@ var deleteCommand = &cobra.Command{
 				}
 				noteids = append(noteids, uint64(noteid))
 			}
-			err := db.DeleteNote(args[0], noteids...)
+			err := db.DeleteNotes(args[0], noteids...)
 			if err != nil {
 				log.Panic()
 			}
