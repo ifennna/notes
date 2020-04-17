@@ -39,25 +39,6 @@ func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
 }
 
 /**
- * Retreives note with a given id
- * param: uint64 noteId
- * return: (Note, error)
- */
-func (db *DB) GetNote(noteId uint64) (Note, error) {
-	var note Note
-	err := db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("Notebook")).Cursor()
-
-		prefix := []byte(strconv.FormatUint(noteId, 10))
-		for key, value := bucket.Seek(prefix); key != nil && bytes.HasPrefix(key, prefix); key, value = bucket.Next() {
-			return json.Unmarshal(value, &note)
-		}
-		return nil
-	})
-	return note, err
-}
-
-/**
  * Adds notes in the given notebook
  * notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * param: string notebookName
