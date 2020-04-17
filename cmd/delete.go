@@ -64,7 +64,7 @@ func deleteNotesIfExist(db models.Datastore, notebookName string, noteIds ...uin
 	for _, noteId := range noteIds {
 		noteExists, _ := db.NoteExists(notebookName, noteId)
 		if noteExists {
-			err := db.DeleteNote(notebookName, noteId)
+			err := db.DeleteNotes(notebookName, noteId)
 			if err != nil {
 				log.Panic()
 			} else {
