@@ -39,7 +39,7 @@ func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
 }
 
 /**
- * Retrives note with a given id
+ * Retreives note with a given id
  * param: uint64 noteId
  * return: (Note, error)
  */
@@ -143,11 +143,11 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 
 
 /**
- * Retrives note with a given id
+ * Retreives note with a given id
  * param: uint64 noteId
  * return: (Note, error)
  */
-func (db *DB) GetNote(notebookName string, noteIndex uint64) (Note, error) {
+func (db *DB) GetNoteFromNotebook(notebookName string, noteIndex uint64) (Note, error) {
 	var note Note
 	err := db.View(func(tx *bolt.Tx) error {
 		reqNoteIdBytes := []byte(strconv.FormatUint(noteIndex, 10))
