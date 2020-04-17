@@ -12,9 +12,9 @@ import (
 
 var deleteCommand = &cobra.Command{
 	Use:   "del",
-	Short: "Delete a note",
-	Long: "Deletes a note from the terminal. Use `notes del Note ID` to delete from the Default" +
-		"notebook or `notes del NotebookName Note ID` to delete from a specific notebook",
+	Short: "Delete notes",
+	Long: "Deletes notes from the terminal. Use `notes del noteId` to delete a note from the Default notebook" +
+		"`notes del NotebookName noteId-1 noteId-2 ..` to delete notes from a specific notebook",
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 

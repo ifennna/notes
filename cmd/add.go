@@ -9,9 +9,9 @@ import (
 
 var addCommand = &cobra.Command{
 	Use:   "add",
-	Short: "Add a note",
-	Long: "Add a note to a notebook from the terminal. Use `notes add \"text\"` to jot in the default notebook or" +
-		"`notes add NotebookName \"text\"` to add notes to other notebooks",
+	Short: "Adds notes",
+	Long: "Adds notes to a notebook from the terminal. Use `notes add \"text\"` to jot in the default notebook or" +
+		"`notes add NotebookName \"text-1\" \"text-2\" ..` to add notes to other notebooks",
 	Run: func(cmd *cobra.Command, args []string) {
 		db := setupDatabase()
 		var err error
