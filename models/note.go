@@ -39,6 +39,27 @@ func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
 }
 
 /**
+ * Retreives note with a given id
+ * param: uint64 noteId
+ * return: (Note, error)
+ */
+func (db *DB) GetNote(notebookName string, noteIndex uint64) (Note, error) {
+	var note Note
+	err := db.View(func(tx *bolt.Tx) error {
+		reqNoteIdBytes := []byte(strconv.FormatUint(noteIndex, 10))
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+
+		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			return json.Unmarshal(foundNoteContentBytes, &note)
+		}
+
+		return nil
+	})
+	return note, err
+}
+
+/**
  * Adds notes in the given notebook
  * notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * param: string notebookName
@@ -120,25 +141,4 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	}
 
 	return err
-}
-
-/**
- * Retreives note with a given id
- * param: uint64 noteId
- * return: (Note, error)
- */
-func (db *DB) GetNoteFromNotebook(notebookName string, noteIndex uint64) (Note, error) {
-	var note Note
-	err := db.View(func(tx *bolt.Tx) error {
-		reqNoteIdBytes := []byte(strconv.FormatUint(noteIndex, 10))
-		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
-
-		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
-		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
-			return json.Unmarshal(foundNoteContentBytes, &note)
-		}
-
-		return nil
-	})
-	return note, err
 }
