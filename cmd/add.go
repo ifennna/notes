@@ -20,10 +20,10 @@ var addCommand = &cobra.Command{
 		case 0:
 			emoji.Println(" :warning: You need to add some text")
 		case 1:
-			err = db.AddNote("Default", args[0])
+			err = db.AddNotes("Default", args[0])
 			emoji.Println(" :pencil2: Note added to 'Default' Notebook")
 		default:
-			err = db.AddNote(args[0], args[1:]...)
+			err = db.AddNotes(args[0], args[1:]...)
 			emoji.Println(" :pencil2: Note(s) added")
 		}
 		if err != nil {

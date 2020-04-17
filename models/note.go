@@ -39,13 +39,32 @@ func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
 }
 
 /**
+ * Retrives note with a given id
+ * param: uint64 noteId
+ * return: (Note, error)
+ */
+func (db *DB) GetNote(noteId uint64) (Note, error) {
+	var note Note
+	err := db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("Notebook")).Cursor()
+
+		prefix := []byte(strconv.FormatUint(noteId, 10))
+		for key, value := bucket.Seek(prefix); key != nil && bytes.HasPrefix(key, prefix); key, value = bucket.Next() {
+			return json.Unmarshal(value, &note)
+		}
+		return nil
+	})
+	return note, err
+}
+
+/**
  * Adds notes in the given notebook
  * notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * param: string notebookName
  * param: ...Note notes
  * return: error
  */
-func (db *DB) AddNote(notebookName string, noteContents ...string) error {
+func (db *DB) AddNotes(notebookName string, noteContents ...string) error {
 	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
 	if err != nil {
@@ -93,7 +112,7 @@ func (db *DB) AddNote(notebookName string, noteContents ...string) error {
  * param: ...uint64 noteIds
  * return: error
  */
-func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
+func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	// TODO: try to remove code-duplication: txn creation & notebook notebookBucket retrieval logic can be extracted out
 	// create a bolt-db transaction with deferred-rollback
 	tx, err := db.Begin(true)
@@ -102,13 +121,13 @@ func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
 	}
 	defer tx.Rollback()
 
-	// retrieve (2nd order) bucket with given notebookName
-	bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
+	// retrieve (2nd order) notebookBucket with given notebookName
+	notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
 	// for each noteId supplied
-	for _, noteID := range noteIDs {
-		// delete the note with given noteId from notebook's bucket
-		err = bucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
+	for _, noteID := range noteIds {
+		// delete the note with given noteId from notebook's notebookBucket
+		err = notebookBucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
 		if err != nil {
 			return err
 		}
@@ -118,8 +137,10 @@ func (db *DB) DeleteNote(notebookName string, noteIDs ...uint64) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-	return err
+  
+  return err
 }
+
 
 /**
  * Retrives note with a given id
