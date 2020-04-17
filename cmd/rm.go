@@ -18,15 +18,19 @@ var removeCommand = &cobra.Command{
 		case 0:
 			emoji.Println(" :warning: You need to specify a notebook to remove ")
 		case 1:
+			// retrieve notebook name from CLI args
 			notebookName := args[0]
+			// check if notebook exists
 			notebookExists, _ := db.NotebookExists(notebookName)
 			if notebookExists {
+				// if notebook exists, try deleting it
 				err := db.RmNotebook(notebookName)
 				if err != nil {
 					log.Panic()
 				}
-				emoji.Println(" :pencil2: Notebook deleted")
+				emoji.Println(fmt.Sprintf(" :pencil2: Notebook '%s' deleted", notebookName))
 			} else {
+				// if notebook doesn't exist, display warning message
 				emoji.Println(fmt.Sprintf(" :warning: Notebook '%s' does not exist", notebookName))
 			}
 		}

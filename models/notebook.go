@@ -122,18 +122,17 @@ func (db *DB) AddNotebook(notebook Notebook) error {
 
 /**
  * Removes a notebook from db
- * - Removes the 'Notebook' bucket from db
- *    - notebookName: Name of notebook
+ * (Removes the 'Notebook' bucket from db)
+ *
+ * param: string notebookName: Name of notebook to be removed
+ * return: error
  */
 func (db *DB) RmNotebook(notebookName string) error {
 	err := db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
-		if bucket != nil {
-			err := tx.Bucket([]byte("Notebook")).DeleteBucket([]byte(notebookName))
-			if err != nil {
-				return fmt.Errorf("could delete bucket: %v", err)
-			}
-			return nil
+		// if successfully retrieved notebook's bucket, try deleting it
+		err := tx.Bucket([]byte("Notebook")).DeleteBucket([]byte(notebookName))
+		if err != nil {
+			return fmt.Errorf("failed to delete notebook-bucket: %v", err)
 		}
 		return nil
 	})
