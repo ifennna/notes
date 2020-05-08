@@ -23,6 +23,9 @@ Available Commands:
     - if `notebook` name is supplied
       - if notebook by given name exists, all notes of that notebook are displayed along with their `note_id`s
       - if notebook by given name doesn't exist, only the entered notebook name is shown in output (needs to be improved)
+  - `lsa`: List stuff
+    - `notes lsa`
+    - names of notebooks are displayed and notes in each notebook are displayed as a tree
   - `del`: Delete notes
     - `notes del notebook note_id_1 note_id_2 ..`
     - if notebook by given name exists
