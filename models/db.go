@@ -14,7 +14,7 @@ import (
 type Datastore interface {
 	// notebook-related operations
 	NotebookExists(notebookName string) (bool, error)
-	GetNotebook(notebookTitle string) (Notebook, error)
+	GetNotebook(notebookName string) (Notebook, error)
 	GetAllNotebooks() ([]Notebook, error)
 	GetAllNotebookNames() ([]string, error)
 	AddNotebook(notebook Notebook) error
@@ -22,9 +22,8 @@ type Datastore interface {
 
 	// note-related operations
 	NoteExists(notebookName string, noteId uint64) (bool, error)
-	GetNote(noteIndex uint64) (Note, error)
-	GetNoteFromNotebook(notebookName string, noteIndex uint64) (Note, error)
-	AddNotes(notebookTitle string, noteContents ...string) error
+	GetNote(notebookName string, noteId uint64) (Note, error)
+	AddNotes(notebookName string, noteContents ...string) error
 	DeleteNotes(notebookName string, noteIDs ...uint64) error
 	// db-backup operation
 	Dump()

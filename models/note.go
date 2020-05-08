@@ -22,10 +22,10 @@ type Note struct {
  * Returns whether or not note with a given id exists
  * in the given notebook or not
  */
-func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
+func (db *DB) NoteExists(notebookName string, noteId uint64) (bool, error) {
 	noteExists := false
 	err := db.View(func(tx *bolt.Tx) error {
-		reqNoteIdBytes := []byte(strconv.FormatUint(reqNoteId, 10))
+		reqNoteIdBytes := []byte(strconv.FormatUint(noteId, 10))
 		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
 		foundNoteIdBytes, _ := notebookBucket.Cursor().Seek(reqNoteIdBytes)
@@ -43,15 +43,17 @@ func (db *DB) NoteExists(notebookName string, reqNoteId uint64) (bool, error) {
  * param: uint64 noteId
  * return: (Note, error)
  */
-func (db *DB) GetNote(noteId uint64) (Note, error) {
+func (db *DB) GetNote(notebookName string, noteId uint64) (Note, error) {
 	var note Note
 	err := db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte("Notebook")).Cursor()
+		reqNoteIdBytes := []byte(strconv.FormatUint(noteId, 10))
+		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
-		prefix := []byte(strconv.FormatUint(noteId, 10))
-		for key, value := bucket.Seek(prefix); key != nil && bytes.HasPrefix(key, prefix); key, value = bucket.Next() {
-			return json.Unmarshal(value, &note)
+		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
+		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+			return json.Unmarshal(foundNoteContentBytes, &note)
 		}
+
 		return nil
 	})
 	return note, err
@@ -121,13 +123,13 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	}
 	defer tx.Rollback()
 
-	// retrieve (2nd order) notebookBucket with given notebookName
+	// retrieve (2nd order, noteBook) bucket with given notebookName
 	notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
 	// for each noteId supplied
-	for _, noteID := range noteIds {
-		// delete the note with given noteId from notebook's notebookBucket
-		err = notebookBucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
+	for _, noteId := range noteIds {
+		// delete the note with given noteId from notebook's bucket
+		err = notebookBucket.Delete([]byte(strconv.FormatUint(noteId, 10)))
 		if err != nil {
 			return err
 		}
@@ -137,28 +139,6 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-  
-  return err
-}
 
-
-/**
- * Retreives note with a given id
- * param: uint64 noteId
- * return: (Note, error)
- */
-func (db *DB) GetNoteFromNotebook(notebookName string, noteIndex uint64) (Note, error) {
-	var note Note
-	err := db.View(func(tx *bolt.Tx) error {
-		reqNoteIdBytes := []byte(strconv.FormatUint(noteIndex, 10))
-		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
-
-		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
-		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
-			return json.Unmarshal(foundNoteContentBytes, &note)
-		}
-
-		return nil
-	})
-	return note, err
+	return err
 }

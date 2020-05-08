@@ -49,14 +49,14 @@ func (db *DB) GetNotebook(notebookName string) (Notebook, error) {
 	notebook.Name = notebookName
 	err := db.View(func(tx *bolt.Tx) error {
 		// conver notebookName to bytes
-		reqNameBytes := []byte(notebookName)
-		// retrieve BoltDb (base) bucket object
+		reqNotebookNameBytes := []byte(notebookName)
+		// retrieve BoldDb (base) bucket object
 		bucket := tx.Bucket([]byte("Notebook"))
 		// check if notebook by given name exists
-		foundNameBytes, _ := bucket.Cursor().Seek(reqNameBytes)
-		if foundNameBytes != nil && bytes.Equal(reqNameBytes, foundNameBytes) {
+		foundNotebookNameBytes, _ := bucket.Cursor().Seek(reqNotebookNameBytes)
+		if foundNotebookNameBytes != nil && bytes.Equal(reqNotebookNameBytes, foundNotebookNameBytes) {
 			// if it exists, retrieve it's notes
-			notebook.Notes = getNotesInNotebook(bucket, reqNameBytes)
+			notebook.Notes = getNotesInNotebook(bucket, reqNotebookNameBytes)
 		}
 
 		return nil
