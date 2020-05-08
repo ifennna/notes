@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/noculture/notes/models"
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
-	"log"
-	"strconv"
 )
 
 var lsCommand = &cobra.Command{
@@ -35,9 +36,9 @@ func getSpecificNotebook(db models.Datastore, notebookName string) {
 		if err != nil {
 			log.Panic()
 		}
-		emoji.Println(notebook.Name)
+		emoji.Println(" :notebook_with_decorative_cover: " + notebook.Name)
 		for _, note := range notebook.Notes {
-			emoji.Println(" " + strconv.FormatUint(note.Id, 10) + "	" + note.Content)
+			emoji.Println("     " + strconv.FormatUint(note.Id, 10) + "| " + note.Content)
 		}
 	} else {
 		emoji.Println(fmt.Sprintf(" :warning: Noteebook '%s' doesn't exist", notebookName))
