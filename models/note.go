@@ -8,28 +8,23 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-/**
- * DTO for a Note within a Notebook
- */
+//Note DTO for a Note within a Notebook
 type Note struct {
 	// TODO: explore allowing 'naming' notes within a notebook
 	//Title   string `json:"title"`
-	Id      uint64 `json:"id"`
+	ID      uint64 `json:"id"`
 	Content string `json:"content"`
 }
 
-/**
- * Returns whether or not note with a given id exists
- * in the given notebook or not
- */
-func (db *DB) NoteExists(notebookName string, noteId uint64) (bool, error) {
+//NoteExists returns whether or not note with a given id exists in the given notebook or not
+func (db *DB) NoteExists(notebookName string, noteID uint64) (bool, error) {
 	noteExists := false
 	err := db.View(func(tx *bolt.Tx) error {
-		reqNoteIdBytes := []byte(strconv.FormatUint(noteId, 10))
+		reqNoteIDBytes := []byte(strconv.FormatUint(noteID, 10))
 		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
-		foundNoteIdBytes, _ := notebookBucket.Cursor().Seek(reqNoteIdBytes)
-		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+		foundNoteIDBytes, _ := notebookBucket.Cursor().Seek(reqNoteIDBytes)
+		if foundNoteIDBytes != nil && bytes.Equal(reqNoteIDBytes, foundNoteIDBytes) {
 			noteExists = true
 		}
 
@@ -38,19 +33,19 @@ func (db *DB) NoteExists(notebookName string, noteId uint64) (bool, error) {
 	return noteExists, err
 }
 
-/**
- * Retreives note with a given id
+//GetNote retreives note with the given id
+/*
  * param: uint64 noteId
  * return: (Note, error)
  */
-func (db *DB) GetNote(notebookName string, noteId uint64) (Note, error) {
+func (db *DB) GetNote(notebookName string, noteID uint64) (Note, error) {
 	var note Note
 	err := db.View(func(tx *bolt.Tx) error {
-		reqNoteIdBytes := []byte(strconv.FormatUint(noteId, 10))
+		reqNoteIDBytes := []byte(strconv.FormatUint(noteID, 10))
 		notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
-		foundNoteIdBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIdBytes)
-		if foundNoteIdBytes != nil && bytes.Equal(reqNoteIdBytes, foundNoteIdBytes) {
+		foundNoteIDBytes, foundNoteContentBytes := notebookBucket.Cursor().Seek(reqNoteIDBytes)
+		if foundNoteIDBytes != nil && bytes.Equal(reqNoteIDBytes, foundNoteIDBytes) {
 			return json.Unmarshal(foundNoteContentBytes, &note)
 		}
 
@@ -59,7 +54,8 @@ func (db *DB) GetNote(notebookName string, noteId uint64) (Note, error) {
 	return note, err
 }
 
-/**
+//AddNotes adds notes in the given notebook
+/*
  * Adds notes in the given notebook
  * notes' auto-increment 'Id' are generated and stored in the db by this method itself
  * param: string notebookName
@@ -86,16 +82,16 @@ func (db *DB) AddNotes(notebookName string, noteContents ...string) error {
 		var note Note = Note{Content: noteContent}
 
 		// gereate noteId
-		noteId, err := notebookBucket.NextSequence()
+		noteID, err := notebookBucket.NextSequence()
 		if err != nil {
 			return err
 		}
-		note.Id = noteId
+		note.ID = noteID
 
 		// put JSON-marshalled noteContent into bolt-db bucket (of given Notebook) with noteId as key
 		if encodedNote, err := json.Marshal(note); err != nil {
 			return err
-		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteId, 10)), encodedNote); err != nil {
+		} else if err := notebookBucket.Put([]byte(strconv.FormatUint(noteID, 10)), encodedNote); err != nil {
 			return err
 		}
 	}
@@ -108,8 +104,8 @@ func (db *DB) AddNotes(notebookName string, noteContents ...string) error {
 	return err
 }
 
-/**
- * Deletes notes with given ids from the given notebook
+//DeleteNotes deletes notes with given ids from the given notebook
+/*
  * param: string notebookName
  * param: ...uint64 noteIds
  * return: error
@@ -127,9 +123,9 @@ func (db *DB) DeleteNotes(notebookName string, noteIds ...uint64) error {
 	notebookBucket := tx.Bucket([]byte("Notebook")).Bucket([]byte(notebookName))
 
 	// for each noteId supplied
-	for _, noteId := range noteIds {
+	for _, noteID := range noteIds {
 		// delete the note with given noteId from notebook's bucket
-		err = notebookBucket.Delete([]byte(strconv.FormatUint(noteId, 10)))
+		err = notebookBucket.Delete([]byte(strconv.FormatUint(noteID, 10)))
 		if err != nil {
 			return err
 		}

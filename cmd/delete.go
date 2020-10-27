@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/noculture/notes/models"
-	"github.com/noculture/notes/utils"
 	"log"
 	"strconv"
+
+	"github.com/noculture/notes/models"
+	"github.com/noculture/notes/utils"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
@@ -53,17 +54,17 @@ var deleteCommand = &cobra.Command{
  * param: ...uint64        noteIds
  */
 func deleteNotesIfExist(db models.Datastore, notebookName string, noteIds ...uint64) {
-	for _, noteId := range noteIds {
-		noteExists, _ := db.NoteExists(notebookName, noteId)
+	for _, noteID := range noteIds {
+		noteExists, _ := db.NoteExists(notebookName, noteID)
 		if noteExists {
-			err := db.DeleteNotes(notebookName, noteId)
+			err := db.DeleteNotes(notebookName, noteID)
 			if err != nil {
 				log.Panic()
 			} else {
-				emoji.Println(fmt.Sprintf(" :pencil2: Note with id '%d' deleted from notebook '%s'", noteId, notebookName))
+				emoji.Println(fmt.Sprintf(" :pencil2: Note with id '%d' deleted from notebook '%s'", noteID, notebookName))
 			}
 		} else {
-			emoji.Println(fmt.Sprintf(" :warning: Note with id '%d' does not exist in notebook '%s'", noteId, notebookName))
+			emoji.Println(fmt.Sprintf(" :warning: Note with id '%d' does not exist in notebook '%s'", noteID, notebookName))
 		}
 	}
 }

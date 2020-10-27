@@ -6,8 +6,8 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-/**
- * - interface defining operations of our 'notes' datastore
+//Datastore interface defining operations of our 'notes' datastore
+/*
  * - notice the function prototypes here have one-to-one mapping with
  *   *almost* every command (plus it's subcommand / options)
  */
@@ -21,16 +21,16 @@ type Datastore interface {
 	RmNotebook(notebookName string) error
 
 	// note-related operations
-	NoteExists(notebookName string, noteId uint64) (bool, error)
-	GetNote(notebookName string, noteId uint64) (Note, error)
+	NoteExists(notebookName string, noteID uint64) (bool, error)
+	GetNote(notebookName string, noteID uint64) (Note, error)
 	AddNotes(notebookName string, noteContents ...string) error
 	DeleteNotes(notebookName string, noteIDs ...uint64) error
 	// db-backup operation
 	Dump()
 }
 
-/**
- * - structure that implements the above Datastore interface
+//DB structure that implements the above Datastore interface
+/*
  * - the concrete implementation of methods has been spread across 2 files
  *   1. notebook.go: Defines DTO (struct) 'Notebook'
  *     - notebook-related operations
@@ -44,8 +44,8 @@ type DB struct {
 	*bolt.DB
 }
 
-/**
- * <Constructor for above DB struct>
+//GetOrCreateDB <Constructor for above DB struct>
+/*
  * Returns an instance of DB struct by either creating a new BoltDb
  * bucket for given `dbFileName` or using an existing one
  * @param dbFileName string The complete (path) qualified filename of for BoltDb file

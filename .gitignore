@@ -18,5 +18,8 @@
 # MacOS
 .DS_Store
 
+#VS Code
+.vscode
+
 # Other
 notebooks.db

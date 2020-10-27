@@ -5,32 +5,27 @@ import (
 	"strconv"
 )
 
-/**
- * Parses single string into uint64
- */
+//ParseUInt64 parses single string into uint64
 func ParseUInt64(arg string) (uint64, error) {
-	noteId, err := strconv.ParseInt(arg, 10, 64)
-	usNoteId := uint64(noteId)
+	noteID, err := strconv.ParseInt(arg, 10, 64)
+	usNoteID := uint64(noteID)
 	if err != nil {
 		fmt.Println("Error while parsing args")
 	}
-	return usNoteId, err
+	return usNoteID, err
 }
 
-/**
- * Parses slice of strings into slice of uint64
- */
+//ParseUInt64Slice parses slice of strings into slice of uint64
 func ParseUInt64Slice(args []string) ([]uint64, error) {
 	var usNoteIds []uint64
-	var usNoteId uint64
+	var usNoteID uint64
 	var err error
 	for _, arg := range args {
-		usNoteId, err = ParseUInt64(arg)
+		usNoteID, err = ParseUInt64(arg)
 		if err != nil {
 			return usNoteIds, err
-		} else {
-			usNoteIds = append(usNoteIds, usNoteId)
 		}
+		usNoteIds = append(usNoteIds, usNoteID)
 	}
 	return usNoteIds, err
 }

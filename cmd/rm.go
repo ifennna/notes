@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/spf13/cobra"
 	"gopkg.in/kyokomi/emoji.v1"
-	"log"
 )
 
 var removeCommand = &cobra.Command{

@@ -10,17 +10,13 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-/**
- * DTO for Notebook
- */
+//Notebook DTO for Notebook
 type Notebook struct {
 	Name  string `json:"name"`
 	Notes []Note `json:"notes"`
 }
 
-/**
- * Returns whether or not notebook by given name exists
- */
+//NotebookExists returns whether or not notebook by given name exists
 func (db *DB) NotebookExists(notebookName string) (bool, error) {
 	notebookExists := false
 	err := db.View(func(tx *bolt.Tx) error {
@@ -39,8 +35,8 @@ func (db *DB) NotebookExists(notebookName string) (bool, error) {
 	return notebookExists, err
 }
 
-/**
- * Retrieves Notebook for given 'notebookTitle' name
+//GetNotebook retrieves Notebook for given 'notebookTitle' name
+/*
  *  - uses cursor.Seek(..) to seek through keys (notebook-names) and find matching key
  *  - then uses getNotesInNotebook() call to retrieve notes of that notebook
  */
@@ -64,7 +60,8 @@ func (db *DB) GetNotebook(notebookName string) (Notebook, error) {
 	return notebook, err
 }
 
-/**
+//GetAllNotebooks retrieves all notebooks (along with their notes)
+/*
  * Retrieves all notebooks (along with their notes)
  *  - deletegates actual work to 'getNotebooksInRootBucket' function
  * // TODO: use this method in Dump()
@@ -80,8 +77,8 @@ func (db *DB) GetAllNotebooks() ([]Notebook, error) {
 	return notebooks, err
 }
 
-/**
- * Retrieves all notebook names
+//GetAllNotebookNames retrieves all notebook names
+/*
  *  - delegates actual work to 'getNotebooksInRootBucket' function
  */
 func (db *DB) GetAllNotebookNames() ([]string, error) {
@@ -99,9 +96,9 @@ func (db *DB) GetAllNotebookNames() ([]string, error) {
 	return notebookNames, err
 }
 
-/**
- * Adds a notebook in db
- * - Puts key-value pair into 'Notebook' bucket of db
+//AddNotebook adds a notebook in db
+/*
+ * 	  - Puts key-value pair into 'Notebook' bucket of db
  *    - Key: Name of notebook
  *    - Value: marshalled JSON blob (bytes) of Notebook object
  */
@@ -120,8 +117,8 @@ func (db *DB) AddNotebook(notebook Notebook) error {
 	return err
 }
 
-/**
- * Removes a notebook from db
+//RmNotebook removes a notebook from db
+/*
  * (Removes the 'Notebook' bucket from db)
  *
  * param: string notebookName: Name of notebook to be removed
@@ -170,7 +167,7 @@ func getNotebooksInRootBucket(cursor *bolt.Cursor, bucket *bolt.Bucket, onlyName
 func getNotesInNotebook(bucket *bolt.Bucket, notebookNameBytes []byte) []Note {
 	var notes []Note
 	nestedBucketCursor := bucket.Bucket([]byte(notebookNameBytes)).Cursor()
-	for noteIdBytes, noteContentBytes := nestedBucketCursor.First(); noteIdBytes != nil; noteIdBytes, noteContentBytes = nestedBucketCursor.Next() {
+	for noteIDBytes, noteContentBytes := nestedBucketCursor.First(); noteIDBytes != nil; noteIDBytes, noteContentBytes = nestedBucketCursor.Next() {
 		var note Note
 		json.Unmarshal(noteContentBytes, &note)
 		notes = append(notes, note)
@@ -178,8 +175,8 @@ func getNotesInNotebook(bucket *bolt.Bucket, notebookNameBytes []byte) []Note {
 	return notes
 }
 
-/**
- * Prints all data of all notebooks
+//Dump prints all data of all notebooks
+/*
  * Output can be piped into a file for persisting and sharing
  *  - delegates actual work to 'dumpCursor' method
  * TODO: add CLI interface to invoke this function
