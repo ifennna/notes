@@ -14,11 +14,6 @@ var root = &cobra.Command{
 	SilenceUsage:  true,
 }
 
-// Register adds a new command
-func Register(cmd *cobra.Command) {
-	root.AddCommand(cmd)
-}
-
 // Execute runs the main command
 func Execute() {
 	if err := root.Execute(); err != nil {
